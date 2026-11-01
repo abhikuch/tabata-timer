@@ -11,10 +11,12 @@ export function shouldShowIosInstallHint(ios: boolean, standalone: boolean, dism
   return ios && !standalone && !dismissed;
 }
 
+/** A tap changes a setting once. Repeats start only after the finger has stayed down. */
+export const HOLD_ARM_MS = 550;
+
 export function nextHoldWait(elapsedMs: number): number {
-  if (elapsedMs < 400) return 400 - elapsedMs;
-  if (elapsedMs >= 2000) return 20;
-  return 100;
+  if (elapsedMs < 1600) return 240;
+  return 150;
 }
 
 export interface KeyInput {

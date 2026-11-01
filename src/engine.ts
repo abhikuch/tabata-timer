@@ -216,3 +216,41 @@ export function liveRemainingMs(state: TimerState, now: number): number {
   if (state.status === "running" && state.endAt != null) return state.endAt - now;
   return state.remainingMs;
 }
+
+export interface PlannedCue {
+  at: number;
+  cue: Cue;
+}
+
+/** Future beeps for a running workout. The opening second of an interval is omitted so it does not sit on the phase cue. */
+export function upcomingCues(state: TimerState, now: number): PlannedCue[] {
+  if (state.status !== "running" || state.endAt == null || state.plan.length === 0) return [];
+  const cues: PlannedCue[] = [];
+  let index = state.index;
+  let endAt = state.endAt;
+
+  const countIns = (intervalEnd: number, durationMs: number) => {
+    const intervalStart = intervalEnd - durationMs;
+    for (let sec = state.beeps; sec >= 1; sec -= 1) {
+      const at = intervalEnd - sec * 1000;
+      if (at <= intervalStart || at <= now) continue;
+      cues.push({ at, cue: { kind: "countIn", second: sec } });
+    }
+  };
+
+  countIns(endAt, state.plan[index].durationMs);
+  for (let guard = 0; guard <= state.plan.length; guard += 1) {
+    const next = index + 1;
+    if (next >= state.plan.length) {
+      if (endAt > now) cues.push({ at: endAt, cue: { kind: "complete" } });
+      break;
+    }
+    if (endAt > now) cues.push({ at: endAt, cue: { kind: "phase", phase: state.plan[next].type } });
+    index = next;
+    endAt += state.plan[index].durationMs;
+    countIns(endAt, state.plan[index].durationMs);
+  }
+
+  cues.sort((a, b) => a.at - b.at);
+  return cues;
+}

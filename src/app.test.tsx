@@ -138,7 +138,7 @@ describe("app", () => {
     render(<App audio={audio} platform={{ ios: true, standalone: false, wakeLock: false }} animate={false} />);
     expect(screen.getByText(/Not supported on this browser/)).toBeTruthy();
     expect(screen.getByText(/Add to Home Screen/)).toBeTruthy();
-    expect(screen.getByText(/mute switch/)).toBeTruthy();
+    expect(screen.getByText(/silent switch/)).toBeTruthy();
     const prompt = vi.fn();
     act(() => {
       window.dispatchEvent(Object.assign(new Event("beforeinstallprompt", { cancelable: true }), { prompt }));

@@ -29,19 +29,9 @@ describe("platform and keys", () => {
     expect(commandFromKey({ ...plain, key: " ", target: { tagName: "BUTTON" } as unknown as EventTarget })).toBe("toggle");
   });
 
-  it("repeats a hold slowly, then five times faster after 2s", () => {
-    expect(nextHoldWait(0)).toBe(400);
-    expect(nextHoldWait(400)).toBe(100);
-    expect(nextHoldWait(1900)).toBe(100);
-    expect(nextHoldWait(2000)).toBe(20);
-    const times = [0];
-    let elapsed = 0;
-    while (elapsed < 2200) {
-      elapsed += nextHoldWait(elapsed);
-      if (elapsed <= 2200) times.push(elapsed);
-    }
-    expect(times.filter((time) => time <= 2000)).toHaveLength(18);
-    expect(times).toContain(2020);
-    expect(times).toContain(2040);
+  it("repeats a hold slowly enough that a resting thumb does not race", () => {
+    expect(nextHoldWait(550)).toBe(240);
+    expect(nextHoldWait(1500)).toBe(240);
+    expect(nextHoldWait(1600)).toBe(150);
   });
 });

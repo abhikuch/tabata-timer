@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPlan, displayedSecond, liveRemainingMs, pause, resetTimer, resume, skipNext, skipPrevious, start, tick, totalMs } from "./engine";
+import { buildPlan, displayedSecond, liveRemainingMs, pause, resetTimer, resume, skipNext, skipPrevious, start, tick, totalMs, upcomingCues } from "./engine";
 import { DEFAULT_SETTINGS } from "./settings";
 import type { Interval, Settings, TimerState } from "./types";
 
@@ -387,6 +387,23 @@ describe("pause, resume, skip", () => {
     expect(jumped.state.index).toBe(1);
     expect(jumped.state.endAt).toBe(45_000 + 20_000);
     expect(jumped.cues).toEqual([{ kind: "phase", phase: "work" }]);
+  });
+
+  it("lists future beeps for background playback and skips the opening second", () => {
+    const running = start(TABATA, 0).state;
+    expect(upcomingCues(running, 0).filter((item) => item.at <= 10_000)).toEqual([
+      { at: 7000, cue: { kind: "countIn", second: 3 } },
+      { at: 8000, cue: { kind: "countIn", second: 2 } },
+      { at: 9000, cue: { kind: "countIn", second: 1 } },
+      { at: 10_000, cue: { kind: "phase", phase: "work" } },
+    ]);
+    const later = tick(running, 7500).state;
+    expect(upcomingCues(later, 7500).filter((item) => item.at <= 10_000)).toEqual([
+      { at: 8000, cue: { kind: "countIn", second: 2 } },
+      { at: 9000, cue: { kind: "countIn", second: 1 } },
+      { at: 10_000, cue: { kind: "phase", phase: "work" } },
+    ]);
+    expect(upcomingCues(pause(running, 1000).state, 1000)).toEqual([]);
   });
 
   it("reset drops progress and does not emit a cue", () => {

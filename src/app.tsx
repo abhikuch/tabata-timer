@@ -94,6 +94,7 @@ export function App({ audio, platform, wakeApi, animate = true, storage }: AppPr
     else if (result.effect.wake === "release") wakeRef.current.release();
     if (result.effect.persist) savePersisted(store, toPersisted(result.model));
     if (result.effect.reload) reloadApp();
+    audioRef.current.syncPlayback?.(result.model.timer.status);
     paint(result.model);
   };
 
@@ -114,16 +115,27 @@ export function App({ audio, platform, wakeApi, animate = true, storage }: AppPr
       raf = window.requestAnimationFrame(loop);
     };
     if (animate) raf = window.requestAnimationFrame(loop);
+    const arm = () => {
+      const current = modelRef.current;
+      audioRef.current.armBackground?.(current.timer, Date.now(), { sound: current.sound, vibe: current.vibe });
+    };
     const onShow = () => {
-      if (document.visibilityState === "hidden") return;
-      apply(reduce(modelRef.current, { type: "foreground", now: Date.now() }));
+      if (document.visibilityState === "hidden") {
+        arm();
+        return;
+      }
+      const heard = audioRef.current.disarmBackground?.() ?? false;
+      const result = reduce(modelRef.current, { type: "foreground", now: Date.now() });
+      apply(heard ? { ...result, effect: { ...result.effect, cues: [] } } : result);
     };
     document.addEventListener("visibilitychange", onShow);
+    window.addEventListener("pagehide", arm);
     window.addEventListener("pageshow", onShow);
     return () => {
       window.clearInterval(id);
       if (raf) window.cancelAnimationFrame(raf);
       document.removeEventListener("visibilitychange", onShow);
+      window.removeEventListener("pagehide", arm);
       window.removeEventListener("pageshow", onShow);
     };
   }, [model.timer.status, animate]);
@@ -262,8 +274,8 @@ function Setup(props: {
           ))}
         </section>
         <section class="card alerts" aria-label="Sound and alerts">
-          <Switch label="Sound" description="Beeps at every interval change" checked={props.sound} onChange={props.onSound} />
-          {props.showAudioHint ? <p class="hint">On iPhone, the mute switch silences timer sounds. <button type="button" onClick={props.onDismissAudio}>Dismiss</button></p> : null}
+          <Switch label="Sound" description="Louder beeps, including if you leave this screen" checked={props.sound} onChange={props.onSound} />
+          {props.showAudioHint ? <p class="hint">On iPhone, the silent switch mutes these beeps. Flip it so the ringer is on. <button type="button" onClick={props.onDismissAudio}>Dismiss</button></p> : null}
           <Switch label="Vibration" description="Buzz on Android when the phase changes" checked={props.vibe} onChange={props.onVibe} />
           <Switch label="Keep screen awake" description={props.wakeText} checked={props.awake} onChange={props.onAwake} />
           <div class="seg-wrap">

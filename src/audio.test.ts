@@ -32,7 +32,7 @@ describe("cue map", () => {
 });
 
 describe("scheduleTone", () => {
-  it("ramps the sine from silence to 0.4 and back without a zero gain", () => {
+  it("ramps the sine up to a clearly audible level and back without a zero gain", () => {
     const events: unknown[] = [];
     const osc = {
       type: "square" as OscillatorType,
@@ -53,7 +53,7 @@ describe("scheduleTone", () => {
     expect(osc.frequency.value).toBe(880);
     expect(events.slice(0, 6)).toEqual([
       ["set", 0.0001, 10.25],
-      ["exp", 0.4, 10.26],
+      ["exp", 0.68, 10.26],
       ["exp", 0.0001, 10.37],
       ["osc-connect", gain],
       ["gain-connect", "dest"],
@@ -105,7 +105,7 @@ describe("playCue", () => {
       const silent = backend();
       const noBuzz = vi.fn();
       playCue(cue, { sound: true, vibe: false }, silent, noBuzz);
-      expect(silent.made).toBe(tonePlan(cue).length);
+      expect(silent.made).toBe(tonePlan(cue).length * 2);
       expect(silent.resumed).toBe(1);
       expect(noBuzz).not.toHaveBeenCalled();
     }
