@@ -6,15 +6,17 @@ import { idleTimer } from "./engine";
 
 describe("display", () => {
   it("formats clocks and countdown seconds", () => {
-    expect(formatClock(0)).toBe("0:00");
-    expect(formatClock(5)).toBe("0:05");
-    expect(formatClock(240)).toBe("4:00");
-    expect(formatClock(990)).toBe("16:30");
-    expect(formatClock(2005)).toBe("33:25");
+    expect(formatClock(0)).toBe("0");
+    expect(formatClock(5)).toBe("5");
+    expect(formatClock(80)).toBe("80");
+    expect(formatClock(240)).toBe("240");
+    expect(formatClock(990)).toBe("990");
+    expect(formatClock(2005)).toBe("2005");
     expect(formatCountdownMs(17_000)).toBe("17");
     expect(formatCountdownMs(59_000)).toBe("59");
-    expect(formatCountdownMs(59_001)).toBe("1:00");
-    expect(formatCountdownMs(61_000)).toBe("1:01");
+    expect(formatCountdownMs(59_001)).toBe("60");
+    expect(formatCountdownMs(61_000)).toBe("61");
+    expect(formatCountdownMs(80_000)).toBe("80");
     expect(formatCountdownMs(1)).toBe("1");
     expect(formatCountdownMs(1000)).toBe("1");
     expect(formatCountdownMs(1001)).toBe("2");
@@ -36,8 +38,8 @@ describe("display", () => {
     expect(shot.elapsedMs + shot.leftMs).toBe(shot.totalMs);
     expect(shot.totalMs).toBe(total(plan));
     const tiles = tileClocks(shot.elapsedMs, shot.totalMs);
-    expect(tiles).toEqual({ elapsed: "0:15", left: "3:45", pct: 6 });
-    expect(headerSubtitle(DEFAULT_SETTINGS, idleTimer())).toBe("4:00 total · 16 intervals");
+    expect(tiles).toEqual({ elapsed: "15", left: "225", pct: 6 });
+    expect(headerSubtitle(DEFAULT_SETTINGS, idleTimer())).toBe("240 total · 16 intervals");
     expect(headerSubtitle(DEFAULT_SETTINGS, running)).toBe("Round 1 of 8");
     expect(headerSubtitle(DEFAULT_SETTINGS, running)).not.toContain("Round 0");
   });
@@ -65,7 +67,7 @@ describe("display", () => {
     expect(view.showUpdate).toBe(false);
     const idle = selectView(DEFAULT_SETTINGS, idleTimer(), 0, true);
     expect(idle.showUpdate).toBe(true);
-    expect(idle.totalText).toBe("4:00");
+    expect(idle.totalText).toBe("240");
     expect(idle.presets.find((item) => item.id === "tabata")?.selected).toBe(true);
     const last = start(DEFAULT_SETTINGS, 0).state;
     const atLast = { ...last, index: last.plan.length - 1, endAt: 1_000_000, lastSec: 20 };

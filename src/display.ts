@@ -14,19 +14,12 @@ export const PHASES: Record<Phase, { label: string; color: string }> = {
 };
 
 export function formatClock(totalSeconds: number): string {
-  const seconds = Math.max(0, Math.round(totalSeconds));
-  const minutes = Math.floor(seconds / 60);
-  const rest = seconds % 60;
-  return `${minutes}:${rest < 10 ? "0" : ""}${rest}`;
+  return String(Math.max(0, Math.round(totalSeconds)));
 }
 
-/** Already-ceiled display seconds. Under 60 is bare; 60 and over is m:ss. */
+/** Whole seconds. Never minutes:seconds. */
 export function formatSecondsLabel(seconds: number): string {
-  const value = Math.max(0, seconds);
-  if (value < 60) return String(value);
-  const minutes = Math.floor(value / 60);
-  const rest = value % 60;
-  return `${minutes}:${rest < 10 ? "0" : ""}${rest}`;
+  return String(Math.max(0, Math.round(seconds)));
 }
 
 export function formatCountdownMs(ms: number): string {

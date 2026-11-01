@@ -31,8 +31,8 @@ describe("app", () => {
   it("shows the default 4:00 Tabata and starts on the button", () => {
     const { audio, cues } = sink();
     render(<App audio={audio} platform={platform} animate={false} />);
-    expect(screen.getByText("4:00")).toBeTruthy();
-    expect(screen.getByText("4:00 total · 16 intervals")).toBeTruthy();
+    expect(screen.getByText("240")).toBeTruthy();
+    expect(screen.getByText("240 total · 16 intervals")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Tabata" }).getAttribute("aria-pressed")).toBe("true");
     fireEvent.click(screen.getByRole("button", { name: "Start workout" }));
     expect(audio.unlock).toHaveBeenCalled();
@@ -62,7 +62,7 @@ describe("app", () => {
     expect(screen.getByRole("timer").textContent).toBe("6");
     fireEvent.click(screen.getByRole("button", { name: "Reset workout" }));
     expect(screen.getByRole("button", { name: "Start workout" })).toBeTruthy();
-    expect(screen.getByText("4:00 total · 16 intervals")).toBeTruthy();
+    expect(screen.getByText("240 total · 16 intervals")).toBeTruthy();
   });
 
   it("skips with the buttons and the keyboard without a double start", () => {
@@ -104,7 +104,7 @@ describe("app", () => {
     clickTimes("Decrease Rest", 2);
     clickTimes("Decrease Rounds", 7);
     clickTimes("Decrease Work", 3);
-    expect(document.querySelector(".total")?.textContent).toBe("0:05");
+    expect(document.querySelector(".total")?.textContent).toBe("5");
     fireEvent.click(screen.getByRole("button", { name: "Start workout" }));
     cues.length = 0;
     act(() => { vi.advanceTimersByTime(5000); });
@@ -121,15 +121,15 @@ describe("app", () => {
     const { audio } = sink();
     const first = render(<App audio={audio} platform={platform} animate={false} />);
     fireEvent.click(screen.getByRole("button", { name: "Decrease Get ready" }));
-    expect(screen.getByText("0:05")).toBeTruthy();
+    expect(screen.getByText("5")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Tabata" }).getAttribute("aria-pressed")).toBe("false");
     first.unmount();
     render(<App audio={audio} platform={platform} animate={false} />);
-    expect(screen.getByText("0:05")).toBeTruthy();
+    expect(screen.getByText("5")).toBeTruthy();
     cleanup();
     localStorage.setItem("tabata.v1", "{");
     render(<App audio={audio} platform={platform} animate={false} />);
-    expect(screen.getByText("4:00 total · 16 intervals")).toBeTruthy();
+    expect(screen.getByText("240 total · 16 intervals")).toBeTruthy();
   });
 
   it("shows install, update, and the unsupported wake note", () => {

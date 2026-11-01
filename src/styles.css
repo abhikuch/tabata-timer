@@ -211,7 +211,7 @@ h1 {
 }
 .step:active:not(:disabled) { background: var(--surface-sunken); }
 .value {
-  width: 52px;
+  width: 64px;
   flex: none;
   text-align: center;
   font-size: 17px;
